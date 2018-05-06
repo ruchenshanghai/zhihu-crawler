@@ -33,6 +33,7 @@ keywords (array) string -> topic,
 answer:
 id int unique,
 question_id int,
+user_id string,
 voteup_count int,
 comment_count int,
 content string,

@@ -210,11 +210,11 @@ public class ParsedUser {
         this.is_org = is_org;
     }
 
-    public boolean isGender() {
+    public boolean isGenderMale() {
         return gender;
     }
 
-    public void setGender(boolean gender) {
+    public void setGenderMale(boolean gender) {
         this.gender = gender;
     }
 
@@ -244,6 +244,14 @@ public class ParsedUser {
                     "school_id=" + school_id +
                     ", major_id=" + major_id +
                     '}';
+        }
+
+        public int getMajor_id() {
+            return major_id;
+        }
+
+        public void setMajor_id(int major_id) {
+            this.major_id = major_id;
         }
     }
 }

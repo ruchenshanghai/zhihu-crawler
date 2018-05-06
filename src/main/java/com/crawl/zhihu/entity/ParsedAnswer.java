@@ -3,6 +3,7 @@ package com.crawl.zhihu.entity;
 public class ParsedAnswer {
     private int id;
     private int question_id;
+    private String user_id;
     private int voteup_count;
     private int comment_count;
     private String content;
@@ -24,6 +25,14 @@ public class ParsedAnswer {
 
     public void setQuestion_id(int question_id) {
         this.question_id = question_id;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
     public int getVoteup_count() {

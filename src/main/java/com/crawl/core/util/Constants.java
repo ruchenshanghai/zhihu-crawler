@@ -37,4 +37,12 @@ public class Constants {
             "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0",
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36"
     };
+
+    public final static int MINIMUM_FOLLOWING_COUNT = 10;
+    public final static int MINIMUM_ANSWER_COUNT= 10;
+    public final static int MINIMUM_QUESTION_COUNT = 10;
+    public final static int MINIMUM_VOTE_UP_COUNT = 10;
+    public final static int MINIMUM_THANKED_COUNT = 10;
+    public final static int MINIMUM_FOLLOWER_COUNT = 10;
+    public final static int MINIMUM_ARTICLE_COUNT = 10;
 }

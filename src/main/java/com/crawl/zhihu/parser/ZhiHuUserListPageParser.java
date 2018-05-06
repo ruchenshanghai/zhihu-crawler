@@ -2,8 +2,10 @@ package com.crawl.zhihu.parser;
 
 
 import com.crawl.core.parser.ListPageParser;
+import com.crawl.core.util.Constants;
 import com.crawl.zhihu.ZhiHuHttpClient;
 import com.crawl.zhihu.entity.Page;
+import com.crawl.zhihu.entity.ParsedUser;
 import com.crawl.zhihu.entity.User;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -16,25 +18,74 @@ import java.util.List;
 /**
  * 用户详情列表页
  */
-public class ZhiHuUserListPageParser implements ListPageParser{
+public class ZhiHuUserListPageParser implements ListPageParser {
     private static ZhiHuUserListPageParser instance;
-    public static ZhiHuUserListPageParser getInstance(){
-        if (instance == null){
-            synchronized (ZhiHuHttpClient.class){
-                if (instance == null){
+
+    public static ZhiHuUserListPageParser getInstance() {
+        if (instance == null) {
+            synchronized (ZhiHuHttpClient.class) {
+                if (instance == null) {
                     instance = new ZhiHuUserListPageParser();
                 }
             }
         }
         return instance;
     }
+
+    public List<ParsedUser> parsedPage(Page page) {
+        List<ParsedUser> parsedUserList = new ArrayList<>();
+        String baseJsonPath = "$.data.length()";
+        DocumentContext dc = JsonPath.parse(page.getHtml());
+        Integer userCount = dc.read(baseJsonPath);
+        for (int i = 0; i < userCount; i++) {
+            String tempBaseJsonPath = "$.data[" + i + "]";
+            ParsedUser tempParsedUser = new ParsedUser();
+            tempParsedUser.setId((String) dc.read(tempBaseJsonPath + ".id"));
+            tempParsedUser.setAvatar_url((String) dc.read(tempBaseJsonPath + ".avatar_url"));
+            tempParsedUser.setUser_token((String) dc.read(tempBaseJsonPath + ".url_token"));
+            tempParsedUser.setName((String) dc.read(tempBaseJsonPath + ".name"));
+            tempParsedUser.setHeadline((String) dc.read(tempBaseJsonPath + ".headline"));
+            tempParsedUser.setFollowing_count((Integer) dc.read(tempBaseJsonPath + ".following_count"));
+            tempParsedUser.setAnswer_count((Integer) dc.read(tempBaseJsonPath + ".answer_count"));
+            tempParsedUser.setQuestion_count((Integer) dc.read(tempBaseJsonPath + ".question_count"));
+            tempParsedUser.setVoteup_count((Integer) dc.read(tempBaseJsonPath + ".voteup_count"));
+            tempParsedUser.setThanked_count((Integer) dc.read(tempBaseJsonPath + ".thanked_count"));
+            tempParsedUser.setFollower_count((Integer) dc.read(tempBaseJsonPath + ".follower_count"));
+            tempParsedUser.setArticles_count((Integer) dc.read(tempBaseJsonPath + ".articles_count"));
+
+            if (tempParsedUser.getFollowing_count() < Constants.MINIMUM_FOLLOWING_COUNT || tempParsedUser.getAnswer_count() < Constants.MINIMUM_ANSWER_COUNT || tempParsedUser.getQuestion_count() < Constants.MINIMUM_QUESTION_COUNT || tempParsedUser.getVoteup_count() < Constants.MINIMUM_VOTE_UP_COUNT || tempParsedUser.getThanked_count() < Constants.MINIMUM_THANKED_COUNT || tempParsedUser.getFollower_count() < Constants.MINIMUM_FOLLOWER_COUNT || tempParsedUser.getArticles_count() < Constants.MINIMUM_ARTICLE_COUNT) {
+                continue;
+            }
+            String tempIdentity = "";
+            ArrayList<String> templocations = new ArrayList<>();
+            ArrayList<ParsedUser.Education> tempEducations = new ArrayList<>();
+            ArrayList<String> tempBestAnswers = new ArrayList<>();
+            ArrayList<String> tempEmployments = new ArrayList<>();
+            int badgeLength = (Integer) dc.read(tempBaseJsonPath + ".badge.length()");
+            if (badgeLength > 0) {
+                for (int j = 0; j < badgeLength; j++) {
+                    String tempBadgeBase = tempBaseJsonPath + ".bagde[" + j + "]";
+                    if (dc.read(tempBadgeBase + ".type").equals("best_answerer")) {
+
+                    }
+                }
+            }
+            tempParsedUser.setArticles_count((Integer) dc.read(tempBaseJsonPath + ".identity"));
+
+
+        }
+
+
+        return parsedUserList;
+    }
+
     @Override
     public List<User> parseListPage(Page page) {
         List<User> userList = new ArrayList<>();
         String baseJsonPath = "$.data.length()";
         DocumentContext dc = JsonPath.parse(page.getHtml());
         Integer userCount = dc.read(baseJsonPath);
-        for (int i = 0; i < userCount; i++){
+        for (int i = 0; i < userCount; i++) {
             User user = new User();
             String userBaseJsonPath = "$.data[" + i + "]";
 //            Boolean temp_is_advertiser = dc.read(userBaseJsonPath + ".is_advertiser");
@@ -72,27 +123,28 @@ public class ZhiHuUserListPageParser implements ListPageParser{
             setUserInfoByJsonPth(user, "thanks", dc, userBaseJsonPath + ".thanked_count");//感谢数
             try {
                 Integer gender = dc.read(userBaseJsonPath + ".gender");
-                if (gender != null && gender == 1){
+                if (gender != null && gender == 1) {
                     user.setSex("male");
-                }
-                else if(gender != null && gender == 0){
+                } else if (gender != null && gender == 0) {
                     user.setSex("female");
                 }
-            } catch (PathNotFoundException e){
+            } catch (PathNotFoundException e) {
                 //没有该属性
             }
             userList.add(user);
         }
         return userList;
     }
+
     /**
      * jsonPath获取值，并通过反射直接注入到user中
+     *
      * @param user
      * @param fieldName
      * @param dc
      * @param jsonPath
      */
-    private void setUserInfoByJsonPth(User user, String fieldName, DocumentContext dc , String jsonPath){
+    private void setUserInfoByJsonPth(User user, String fieldName, DocumentContext dc, String jsonPath) {
         try {
             Object o = dc.read(jsonPath);
             Field field = user.getClass().getDeclaredField(fieldName);
@@ -100,7 +152,7 @@ public class ZhiHuUserListPageParser implements ListPageParser{
             field.set(user, o);
         } catch (PathNotFoundException e1) {
             //no results
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
