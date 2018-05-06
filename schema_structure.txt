@@ -1,0 +1,59 @@
+user:
+id string,
+avatar_url string,
+url_token string,
+name string,
+headline string,
+following_count int,
+answer_count int,
+question_count int,
+voteup_count int,
+thanked_count int,
+follower_count int,
+articles_count int,
+identity string(maybe null),
+locations: (array) [location_id] -> topic,
+educations: (array) [{school_id + major_id}] -> school, major,
+best_answerer: (array) [topic_id] -> topic,
+employments: (array) [company_id] -> topic,
+is_advertiser boolean,
+is_org boolean,
+gender: 0 for female / 1 for male,
+
+
+topic:
+id string,
+name string,
+avatar_url string,
+introduction string,
+is_location boolean,
+is_school boolean,
+is_major boolean,
+is_company boolean,
+##topic_type (string array)(default topic, -> location, school, major, company),
+
+
+location: 
+id string,
+name string,
+avatar_url string,
+introduction string,
+type string,
+
+
+school:
+id string,
+name string,
+avatar_url string,
+introduction string,
+type string,
+
+
+major:
+id string,
+name string,
+avatar_url string,
+introduction string,
+type string,
+
+

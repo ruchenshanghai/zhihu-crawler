@@ -37,6 +37,24 @@ public class ZhiHuUserListPageParser implements ListPageParser{
         for (int i = 0; i < userCount; i++){
             User user = new User();
             String userBaseJsonPath = "$.data[" + i + "]";
+            Boolean temp_is_advertiser = dc.read(userBaseJsonPath + ".is_advertiser");
+            if (temp_is_advertiser) {
+                System.out.println("get");
+                System.out.println(dc.read(userBaseJsonPath + ".name"));
+            }
+
+//            int badgeCount = (Integer)dc.read(userBaseJsonPath + ".badge.length()");
+//            if (badgeCount > 0) {
+////                System.out.println("get");
+//                for (int j = 0; j < badgeCount; j++){
+//                    String badgeTypeBase = userBaseJsonPath + ".badge[" + j + "].type";
+//                    String tempType = dc.read(badgeTypeBase);
+//                    System.out.println(tempType);
+//                    if (!tempType.equals("best_answerer") && !tempType.equals("identity")) {
+//                        System.out.println("new badge type: " + tempType);
+//                    }
+//                }
+//            }
             setUserInfoByJsonPth(user, "userToken", dc, userBaseJsonPath + ".url_token");//user_token
             setUserInfoByJsonPth(user, "username", dc, userBaseJsonPath + ".name");//username
             setUserInfoByJsonPth(user, "hashId", dc, userBaseJsonPath + ".id");//hashId

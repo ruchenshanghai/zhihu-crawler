@@ -70,7 +70,8 @@ public class DetailListPageTask extends AbstractPageTask{
         }
         List<User> list = proxyUserListPageParser.parseListPage(page);
         for(User u : list){
-            logger.info("解析用户成功:" + u.toString());
+//            System.out.println(u.getUserToken());
+//            logger.info("解析用户成功:" + u.toString());
             if(Config.dbEnable){
                 Connection cn = getConnection();
                 if (zhiHuDao1.insertUser(cn, u)){
