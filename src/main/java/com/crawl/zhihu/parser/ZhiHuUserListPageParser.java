@@ -37,11 +37,11 @@ public class ZhiHuUserListPageParser implements ListPageParser{
         for (int i = 0; i < userCount; i++){
             User user = new User();
             String userBaseJsonPath = "$.data[" + i + "]";
-            Boolean temp_is_advertiser = dc.read(userBaseJsonPath + ".is_advertiser");
-            if (temp_is_advertiser) {
-                System.out.println("get");
-                System.out.println(dc.read(userBaseJsonPath + ".name"));
-            }
+//            Boolean temp_is_advertiser = dc.read(userBaseJsonPath + ".is_advertiser");
+//            if (temp_is_advertiser) {
+//                System.out.println("get");
+//                System.out.println(dc.read(userBaseJsonPath + ".name"));
+//            }
 
 //            int badgeCount = (Integer)dc.read(userBaseJsonPath + ".badge.length()");
 //            if (badgeCount > 0) {
