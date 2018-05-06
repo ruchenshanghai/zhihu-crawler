@@ -1,7 +1,7 @@
 user:
-id string,
+id string unique,
 avatar_url string,
-url_token string,
+user_token string unique,
 name string,
 headline string,
 following_count int,
@@ -22,7 +22,7 @@ gender: 0 for female / 1 for male,
 
 
 question:
-id int,
+id int unique,
 content string,
 followers int,
 viewers int,
@@ -31,7 +31,7 @@ answers int,
 keywords (array) string -> topic,
 
 answer:
-id int,
+id int unique,
 question_id int,
 voteup_count int,
 comment_count int,
@@ -39,8 +39,8 @@ content string,
 
 
 topic:
-id string,
-name string,
+id string unique,
+name string unique,
 avatar_url string,
 introduction string,
 is_location boolean,

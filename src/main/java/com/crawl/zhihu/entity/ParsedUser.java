@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class ParsedUser {
     private String id;
     private String avatar_url;
-    private String url_token;
+    private String user_token;
     private String name;
     private String headline;
     // parse by badge
@@ -37,7 +37,7 @@ public class ParsedUser {
         return "ParsedUser{" +
                 "id='" + id + '\'' +
                 ", avatar_url='" + avatar_url + '\'' +
-                ", url_token='" + url_token + '\'' +
+                ", user_token='" + user_token + '\'' +
                 ", name='" + name + '\'' +
                 ", headline='" + headline + '\'' +
                 ", identity='" + identity + '\'' +
@@ -74,12 +74,12 @@ public class ParsedUser {
         this.avatar_url = avatar_url;
     }
 
-    public String getUrl_token() {
-        return url_token;
+    public String getUser_token() {
+        return user_token;
     }
 
-    public void setUrl_token(String url_token) {
-        this.url_token = url_token;
+    public void setUser_token(String user_token) {
+        this.user_token = user_token;
     }
 
     public String getName() {
