@@ -1,5 +1,7 @@
 package com.crawl.zhihu.entity;
 
+import java.util.Arrays;
+
 public class ParsedQuestion {
     private int id;
     private String content;
@@ -66,5 +68,18 @@ public class ParsedQuestion {
 
     public void setKeywords(String[] keywords) {
         this.keywords = keywords;
+    }
+
+    @Override
+    public String toString() {
+        return "ParsedQuestion{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", followers=" + followers +
+                ", viewers=" + viewers +
+                ", answers=" + answers +
+                ", comments=" + comments +
+                ", keywords=" + Arrays.toString(keywords) +
+                '}';
     }
 }

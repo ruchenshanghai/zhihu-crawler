@@ -58,4 +58,16 @@ public class ParsedAnswer {
     public void setContent(String content) {
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        return "ParsedAnswer{" +
+                "id=" + id +
+                ", question_id=" + question_id +
+                ", user_id='" + user_id + '\'' +
+                ", voteup_count=" + voteup_count +
+                ", comment_count=" + comment_count +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }

@@ -16,7 +16,7 @@ public interface ParsedEntityDAOInterface {
     boolean insertParsedUser(ParsedUser parsedUser);
 
 
-    boolean isParsedTopicExisted(String id);
+    boolean isParsedTopicExisted(int id);
 
     boolean insertParsedTopic(ParsedTopic parsedTopic);
 

@@ -36,10 +36,6 @@
     {
       "topics": [
         {
-          "type": "identity",
-          "description": "\u7efc\u5408\u4f53\u80b2\u8d5b\u4e8b\u8bc4\u8bba\u5458\uff0c\u8bf4\u76df\u7b7e\u7ea6\u4e3b\u64ad"
-        },
-        {
           "url": "http://www.zhihu.com/api/v4/topics/19551137",
           "avatar_url": "https://pic4.zhimg.com/975baaf73fd76f48ce6f05e19b176878_is.jpg",
           "name": "\u7f8e\u98df",

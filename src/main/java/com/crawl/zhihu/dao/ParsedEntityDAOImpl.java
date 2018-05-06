@@ -53,8 +53,8 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             return false;
         }
         String columns = "id, avatar_url, user_token, name, headline, following_count, answer_count, question_count, voteup_count, thanked_count, " +
-                "follower_count, articles_count, identity, locations, educations, best_answerer, employments, is_advertiser, is_org, gender";
-        String values = "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?";
+                "follower_count, articles_count, identity, locations, educations, best_answerer, employments, is_advertiser, is_org, gender, business_id";
+        String values = "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?";
         String sql = "insert into parsed_user (" + columns + ") values (" + values + ")";
         try {
             PreparedStatement preparedStatement = ConnectionManager.getConnection().prepareStatement(sql);
@@ -78,6 +78,7 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             preparedStatement.setBoolean(18, parsedUser.isIs_advertiser());
             preparedStatement.setBoolean(19, parsedUser.isIs_org());
             preparedStatement.setBoolean(20, parsedUser.isGenderMale());
+            preparedStatement.setInt(21, parsedUser.getBusiness_id());
             preparedStatement.executeUpdate();
             preparedStatement.close();
             logger.info("parsed_user: " + parsedUser.toString());
@@ -89,7 +90,7 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean isParsedTopicExisted(String id) {
+    public boolean isParsedTopicExisted(int id) {
         String containsParsedTopicSql = "select count(*) from parsed_topic where id='" + id + "'";
         try {
             if (isExistEntity(containsParsedTopicSql)) {
@@ -106,12 +107,12 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
         if (isParsedTopicExisted(parsedTopic.getId())) {
             return false;
         }
-        String columns = "id, name, avatar_url, introduction, is_location, is_school, is_major, is_company";
-        String values = "?, ?, ?, ?, ?, ?, ?, ?";
+        String columns = "id, name, avatar_url, introduction, is_location, is_school, is_major, is_company, is_job, is_business";
+        String values = "?, ?, ?, ?, ?, ?, ?, ?, ?, ?";
         String sql = "insert into parsed_topic (" + columns + ") values (" + values + ")";
         try {
             PreparedStatement preparedStatement = ConnectionManager.getConnection().prepareStatement(sql);
-            preparedStatement.setString(1, parsedTopic.getId());
+            preparedStatement.setInt(1, parsedTopic.getId());
             preparedStatement.setString(2, parsedTopic.getName());
             preparedStatement.setString(3, parsedTopic.getAvatar_url());
             preparedStatement.setString(4, parsedTopic.getIntroduction());
@@ -119,6 +120,8 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             preparedStatement.setBoolean(6, parsedTopic.isIs_school());
             preparedStatement.setBoolean(7, parsedTopic.isIs_major());
             preparedStatement.setBoolean(8, parsedTopic.isIs_company());
+            preparedStatement.setBoolean(9, parsedTopic.isIs_job());
+            preparedStatement.setBoolean(10, parsedTopic.isIs_business());
             preparedStatement.executeUpdate();
             preparedStatement.close();
             logger.info("parsed_topic: " + parsedTopic.toString());

@@ -2,7 +2,7 @@ package com.crawl.zhihu.entity;
 
 public class ParsedTopic {
     //唯一标示id
-    private String id;
+    private int id;
     //唯一标示图片地址
     private String avatar_url;
     //标识名称
@@ -10,19 +10,23 @@ public class ParsedTopic {
     //话题简介
     private String introduction;
     //是否为地址
-    private boolean is_location;
+    private boolean is_location = false;
     //是否为学校
-    private boolean is_school;
+    private boolean is_school = false;
     //是否为专业
-    private boolean is_major;
+    private boolean is_major = false;
+    //是否为职业
+    private boolean is_job = false;
     //是否为公司
-    private boolean is_company;
+    private boolean is_company = false;
+    //是否为行业
+    private boolean is_business = false;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -82,17 +86,35 @@ public class ParsedTopic {
         this.is_company = is_company;
     }
 
+    public boolean isIs_job() {
+        return is_job;
+    }
+
+    public void setIs_job(boolean is_job) {
+        this.is_job = is_job;
+    }
+
+    public boolean isIs_business() {
+        return is_business;
+    }
+
+    public void setIs_business(boolean is_business) {
+        this.is_business = is_business;
+    }
+
     @Override
     public String toString() {
         return "ParsedTopic{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", avatar_url='" + avatar_url + '\'' +
                 ", name='" + name + '\'' +
                 ", introduction='" + introduction + '\'' +
                 ", is_location=" + is_location +
                 ", is_school=" + is_school +
                 ", is_major=" + is_major +
+                ", is_job=" + is_job +
                 ", is_company=" + is_company +
+                ", is_business=" + is_business +
                 '}';
     }
 }

@@ -10,11 +10,13 @@ public class ParsedUser {
     private String headline;
     // parse by badge
     private String identity;
-    private int[] best_answerer;
 
+
+    private int business_id;
+    private int[] best_answerer;
     private int[] locations;
     private Education[] educations;
-    private int[] employments;
+    private Employment[] employments;
 
     private int following_count;
     private int answer_count;
@@ -41,6 +43,7 @@ public class ParsedUser {
                 ", name='" + name + '\'' +
                 ", headline='" + headline + '\'' +
                 ", identity='" + identity + '\'' +
+                ", business_id=" + business_id +
                 ", best_answerer=" + Arrays.toString(best_answerer) +
                 ", locations=" + Arrays.toString(locations) +
                 ", educations=" + Arrays.toString(educations) +
@@ -56,6 +59,14 @@ public class ParsedUser {
                 ", is_org=" + is_org +
                 ", gender=" + gender +
                 '}';
+    }
+
+    public int getBusiness_id() {
+        return business_id;
+    }
+
+    public void setBusiness_id(int business_id) {
+        this.business_id = business_id;
     }
 
     public String getId() {
@@ -130,11 +141,11 @@ public class ParsedUser {
         this.educations = educations;
     }
 
-    public int[] getEmployments() {
+    public Employment[] getEmployments() {
         return employments;
     }
 
-    public void setEmployments(int[] employments) {
+    public void setEmployments(Employment[] employments) {
         this.employments = employments;
     }
 
@@ -252,6 +263,38 @@ public class ParsedUser {
 
         public void setMajor_id(int major_id) {
             this.major_id = major_id;
+        }
+    }
+
+    public static class Employment {
+        private int job_id;
+        private int company_id;
+
+        public Employment() {
+        }
+
+        public int getJob_id() {
+            return job_id;
+        }
+
+        public void setJob_id(int job_id) {
+            this.job_id = job_id;
+        }
+
+        public int getCompany_id() {
+            return company_id;
+        }
+
+        public void setCompany_id(int company_id) {
+            this.company_id = company_id;
+        }
+
+        @Override
+        public String toString() {
+            return "Employment{" +
+                    "job_id=" + job_id +
+                    ", company_id=" + company_id +
+                    '}';
         }
     }
 }

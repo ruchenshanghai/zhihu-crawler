@@ -5,6 +5,7 @@ import com.crawl.core.parser.ListPageParser;
 import com.crawl.core.util.Constants;
 import com.crawl.zhihu.ZhiHuHttpClient;
 import com.crawl.zhihu.entity.Page;
+import com.crawl.zhihu.entity.ParsedTopic;
 import com.crawl.zhihu.entity.ParsedUser;
 import com.crawl.zhihu.entity.User;
 import com.jayway.jsonpath.DocumentContext;
@@ -13,7 +14,9 @@ import com.jayway.jsonpath.PathNotFoundException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户详情列表页
@@ -34,6 +37,7 @@ public class ZhiHuUserListPageParser implements ListPageParser {
 
     public List<ParsedUser> parsedPage(Page page) {
         List<ParsedUser> parsedUserList = new ArrayList<>();
+        Map<Integer, ParsedTopic> parsedTopicMap = new LinkedHashMap<>();
         String baseJsonPath = "$.data.length()";
         DocumentContext dc = JsonPath.parse(page.getHtml());
         Integer userCount = dc.read(baseJsonPath);
@@ -52,27 +56,89 @@ public class ZhiHuUserListPageParser implements ListPageParser {
             tempParsedUser.setThanked_count((Integer) dc.read(tempBaseJsonPath + ".thanked_count"));
             tempParsedUser.setFollower_count((Integer) dc.read(tempBaseJsonPath + ".follower_count"));
             tempParsedUser.setArticles_count((Integer) dc.read(tempBaseJsonPath + ".articles_count"));
-
+            try {
+                ParsedTopic tempBusiness = new ParsedTopic();
+                tempBusiness.setId(Integer.parseInt((String) dc.read(tempBaseJsonPath + ".business.id")));
+                tempBusiness.setName((String) dc.read(tempBaseJsonPath + ".business.name"));
+                tempBusiness.setAvatar_url((String) dc.read(tempBaseJsonPath + ".business.avatar_url"));
+                tempBusiness.setIntroduction((String) dc.read(tempBaseJsonPath + ".business.introduction"));
+                tempBusiness.setIs_business(true);
+                if (!parsedTopicMap.containsKey(tempBusiness.getId())) {
+                    parsedTopicMap.put(tempBusiness.getId(), tempBusiness);
+                } else {
+                    parsedTopicMap.get(tempBusiness.getId()).setIs_business(true);
+                }
+                tempParsedUser.setBusiness_id(tempBusiness.getId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             if (tempParsedUser.getFollowing_count() < Constants.MINIMUM_FOLLOWING_COUNT || tempParsedUser.getAnswer_count() < Constants.MINIMUM_ANSWER_COUNT || tempParsedUser.getQuestion_count() < Constants.MINIMUM_QUESTION_COUNT || tempParsedUser.getVoteup_count() < Constants.MINIMUM_VOTE_UP_COUNT || tempParsedUser.getThanked_count() < Constants.MINIMUM_THANKED_COUNT || tempParsedUser.getFollower_count() < Constants.MINIMUM_FOLLOWER_COUNT || tempParsedUser.getArticles_count() < Constants.MINIMUM_ARTICLE_COUNT) {
                 continue;
             }
-            String tempIdentity = "";
-            ArrayList<String> templocations = new ArrayList<>();
             ArrayList<ParsedUser.Education> tempEducations = new ArrayList<>();
-            ArrayList<String> tempBestAnswers = new ArrayList<>();
             ArrayList<String> tempEmployments = new ArrayList<>();
+
+            // badge -> identity, best_answerer
             int badgeLength = (Integer) dc.read(tempBaseJsonPath + ".badge.length()");
             if (badgeLength > 0) {
+                String tempIdentity = "";
+                ArrayList<Integer> tempBestAnswers = new ArrayList<>();
                 for (int j = 0; j < badgeLength; j++) {
                     String tempBadgeBase = tempBaseJsonPath + ".bagde[" + j + "]";
                     if (dc.read(tempBadgeBase + ".type").equals("best_answerer")) {
-
+                        int tempTopicCount = (Integer) dc.read(tempBadgeBase + ".topics.length()");
+                        for (int topicIndex = 0; topicIndex < tempTopicCount; topicIndex++) {
+                            String tempTopicBase = tempBadgeBase + ".topics[" + topicIndex + "]";
+                            ParsedTopic tempTopic = new ParsedTopic();
+                            tempTopic.setId(Integer.parseInt((String) dc.read(tempTopicBase + ".id")));
+                            tempTopic.setName((String) dc.read(tempTopicBase + ".name"));
+                            tempTopic.setAvatar_url((String) dc.read(tempTopicBase + ".avatar_url"));
+                            tempTopic.setIntroduction((String) dc.read(tempTopicBase + ".introduction"));
+                            tempBestAnswers.add(tempTopic.getId());
+                            if (!parsedTopicMap.containsKey(tempTopic.getId())) {
+                                parsedTopicMap.put(tempTopic.getId(), tempTopic);
+                            }
+                        }
+                    } else if (dc.read(tempBadgeBase + ".type").equals("identity")) {
+                        tempIdentity = dc.read(tempBadgeBase + ".description");
                     }
                 }
+                tempParsedUser.setIdentity(tempIdentity);
+                int[] temp_best_answers = new int[tempBestAnswers.size()];
+                for (int j = 0; j < tempBestAnswers.size(); j++) {
+                    temp_best_answers[j] = tempBestAnswers.get(j);
+                }
+                tempParsedUser.setBest_answerer(temp_best_answers);
+            } else {
+                tempParsedUser.setIdentity(null);
+                tempParsedUser.setBest_answerer(null);
             }
-            tempParsedUser.setArticles_count((Integer) dc.read(tempBaseJsonPath + ".identity"));
+            // locations
+            int locationLength = (Integer) dc.read(tempBaseJsonPath + ".locations.length()");
+            if (locationLength > 0) {
+                int[] tempLocations = new int[locationLength];
+                for (int j = 0; j < locationLength; j++) {
+                    String tempLocationBase = tempBaseJsonPath + ".locations[" + j + "]";
+                    ParsedTopic tempLocation = new ParsedTopic();
+                    tempLocation.setId(Integer.parseInt((String) dc.read(tempLocationBase + ".id")));
+                    tempLocation.setName((String) dc.read(tempLocationBase + ".name"));
+                    tempLocation.setAvatar_url((String) dc.read(tempLocationBase + ".avatar_url"));
+                    tempLocation.setIntroduction((String) dc.read(tempLocationBase + ".introduction"));
+                    tempLocation.setIs_location(true);
+                    tempLocations[j] = tempLocation.getId();
+                    if (!parsedTopicMap.containsKey(tempLocations[j])) {
+                        parsedTopicMap.put(tempLocations[j], tempLocation);
+                    } else {
+                        parsedTopicMap.get(tempLocations[j]).setIs_location(true);
+                    }
+                }
+                tempParsedUser.setLocations(tempLocations);
+            } else {
+                tempParsedUser.setLocations(null);
+            }
+            // educations
 
-
+            // employments
         }
 
 
