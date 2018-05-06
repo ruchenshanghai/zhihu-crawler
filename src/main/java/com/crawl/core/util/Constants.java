@@ -23,6 +23,8 @@ public class Constants {
             "question,excerpt,relationship.is_authorized,voting,is_author,is_thanked,is_nothelp,upvoted_followees;" +
             "data[*].author.badge[?(type=best_answerer)].topics&offset=%d&limit=20&sort_by=created";
 
+    public final static String QUESTION_URL = "https://www.zhihu.com/question/%d";
+
     public final static String[] userAgentArray = new String[]{
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2623.110 Safari/537.36",

@@ -7,6 +7,7 @@ import com.crawl.core.util.*;
 import com.crawl.proxy.ProxyHttpClient;
 import com.crawl.zhihu.dao.ZhiHuDao1Imp;
 import com.crawl.zhihu.support.PicAnswerTask;
+import com.crawl.zhihu.support.QuestionTask;
 import com.crawl.zhihu.task.DetailListPageTask;
 import com.crawl.zhihu.task.GeneralPageTask;
 import org.apache.http.client.methods.HttpGet;
@@ -131,6 +132,15 @@ public class ZhiHuHttpClient extends AbstractHttpClient implements IHttpClient{
         HttpRequestBase request = new HttpGet(startUrl);
         request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
         answerPageThreadPool.execute(new PicAnswerTask(request, true, userToken));
+    }
+
+    public void startCrawlQuestion(int questionID) {
+        ThreadPoolExecutor answerPool = new SimpleThreadPoolExecutor(Config.downloadThreadSize, Config.downloadThreadSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), "answerPool");
+        new Thread(new ThreadPoolMonitor(answerPool, "answerPoolMonitor")).start();
+        String startUrl = String.format(Constants.QUESTION_URL, questionID);
+        HttpRequestBase request = new HttpGet(startUrl);
+        answerPool.execute(new QuestionTask(request, true, questionID));
+
     }
 
     /**

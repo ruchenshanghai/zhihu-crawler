@@ -21,6 +21,23 @@ is_org boolean,
 gender: 0 for female / 1 for male,
 
 
+question:
+id int,
+content string,
+followers int,
+viewers int,
+coments int,
+answers int,
+keywords (array) string -> topic,
+
+answer:
+id int,
+question_id int,
+voteup_count int,
+comment_count int,
+content string,
+
+
 topic:
 id string,
 name string,
@@ -55,5 +72,6 @@ name string,
 avatar_url string,
 introduction string,
 type string,
+
 
 
