@@ -89,53 +89,16 @@ public class DetailListPageTask extends AbstractPageTask{
                     parseUserCount.incrementAndGet();
                 }
                 for (int j = 0; j < pu.getFollowing_count() / 20; j++) {
-                    if (zhiHuHttpClient.getDetailListPageThreadPool().getQueue().size() > 1000) {
-                        continue;
-                    }
-                    if (zhiHuHttpClient.getDetailListPageThreadPool().getActiveCount() == 1) {
-                        String nextUrl = String.format(USER_FOLLOWEES_URL, pu.getUser_token(), j * 20);
-                        HttpGet request = new HttpGet(nextUrl);
-                        request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
-                        zhiHuHttpClient.getDetailListPageThreadPool().execute(new DetailListPageTask(request, true));
-                    }
+//                    if (zhiHuHttpClient.getDetailListPageThreadPool().getQueue().size() > 1000) {
+//                        continue;
+//                    }
+                    String nextUrl = String.format(USER_FOLLOWEES_URL, pu.getUser_token(), j * 20);
+                    HttpGet request = new HttpGet(nextUrl);
+                    request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
+                    zhiHuHttpClient.getDetailListPageThreadPool().execute(new DetailListPageTask(request, true));
                 }
             }
         }
-
-
-//        List<User> list = proxyUserListPageParser.parseListPage(page);
-//        for(User u : list){
-////            System.out.println(u.getUserToken());
-////            logger.info("解析用户成功:" + u.toString());
-//            if(Config.dbEnable){
-//                Connection cn = getConnection();
-//                if (zhiHuDao1.insertUser(cn, u)){
-//                    parseUserCount.incrementAndGet();
-//                }
-//                for (int j = 0; j < u.getFollowees() / 20; j++){
-//                    if (zhiHuHttpClient.getDetailListPageThreadPool().getQueue().size() > 1000){
-//                        continue;
-//                    }
-//                    String nextUrl = String.format(USER_FOLLOWEES_URL, u.getUserToken(), j * 20);
-//                    if (zhiHuDao1.insertUrl(cn, Md5Util.Convert2Md5(nextUrl)) ||
-//                            zhiHuHttpClient.getDetailListPageThreadPool().getActiveCount() == 1){
-//                        //防止死锁
-//                        HttpGet request = new HttpGet(nextUrl);
-//                        request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
-//                        zhiHuHttpClient.getDetailListPageThreadPool().execute(new DetailListPageTask(request, true));
-//                    }
-//                }
-//            }
-//            else if(!Config.dbEnable || zhiHuHttpClient.getDetailListPageThreadPool().getActiveCount() == 1){
-//                parseUserCount.incrementAndGet();
-//                for (int j = 0; j < u.getFollowees() / 20; j++){
-//                    String nextUrl = String.format(USER_FOLLOWEES_URL, u.getUserToken(), j * 20);
-//                    HttpGet request = new HttpGet(nextUrl);
-//                    request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
-//                    zhiHuHttpClient.getDetailListPageThreadPool().execute(new DetailListPageTask(request, true));
-//                }
-//            }
-//        }
     }
 
     /**
