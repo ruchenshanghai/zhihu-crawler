@@ -39,13 +39,12 @@ public class ParsedQuestionTask extends AbstractPageTask {
     protected void handle(Page page) {
         Document dc = Jsoup.parse(page.getHtml());
         ParsedQuestion parsedQuestion = parseQuestion(dc);
-        if (Config.dbEnable && parsedQuestion != null) {
+        if (Config.dbEnable && parsedQuestion != null && parsedQuestion.getFollowers() > 0 && parsedQuestion.getViewers() > 0 && parsedQuestion.getComments() > 0 && parsedQuestion.getAnswers() > 0) {
             java.sql.Connection connection = ConnectionManager.getConnection();
             if (parsedEntityDAOInterface.isParsedQuestionExisted(connection, parsedQuestion.getId())) {
                 logger.info("parsed_question existed");
             } else {
                 boolean insertRes = parsedEntityDAOInterface.insertParsedQuestion(connection, parsedQuestion);
-                logger.info("parsed_question: " + parsedQuestion.toString() + " " + insertRes);
             }
         }
     }
@@ -61,11 +60,9 @@ public class ParsedQuestionTask extends AbstractPageTask {
             int answers = 0;
             Elements elContent = dc.select("[itemProp=name]");
             questionContent = elContent.first().attr("content");
-            System.out.println(questionContent);
 
             Elements elKeyword = dc.select("[itemProp=keywords]");
             String questionKeyword = elKeyword.first().attr("content");
-            System.out.println(questionKeyword);
             keywordArray = questionKeyword.split(",");
 
             Elements elNums = dc.select(".NumberBoard-itemValue");

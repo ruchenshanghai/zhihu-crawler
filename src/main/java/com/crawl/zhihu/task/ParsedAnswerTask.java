@@ -50,10 +50,12 @@ public class ParsedAnswerTask extends AbstractPageTask{
         DocumentContext dc = JsonPath.parse(page.getHtml());
         ParsedAnswer[] parsedAnswers = parseAnswers(dc);
         for(ParsedAnswer parsedAnswer : parsedAnswers){
-            if (Config.dbEnable) {
+            if (Config.dbEnable && parsedAnswer.getVoteup_count() > 0 && parsedAnswer.getComment_count() > 0) {
                 Connection connection = getConnection();
                 boolean insertRes = parsedEntityDAOInterface.insertParsedAnswer(connection, parsedAnswer);
-                logger.info("parsed_answer: " + parsedAnswer.toString() + " " + insertRes);
+                if (insertRes) {
+                    logger.info("parsed_answer: " + parsedAnswer.toString() + " " + insertRes);
+                }
 
                 if(!parsedEntityDAOInterface.isParsedQuestionExisted(connection, parsedAnswer.getQuestion_id())) {
                     ZhiHuHttpClient.getInstance().startCrawlQuestion(parsedAnswer.getQuestion_id());
