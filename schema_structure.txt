@@ -1,4 +1,4 @@
-user:
+parsed_user:
 id string unique,
 avatar_url string,
 user_token string unique,
@@ -22,7 +22,7 @@ is_org boolean,
 gender: 0 for female / 1 for male,
 
 
-question:
+parsed_question:
 id int unique,
 content string,
 followers int,
@@ -31,7 +31,7 @@ comments int,
 answers int,
 keywords (array) string -> topic,
 
-answer:
+parsed_answer:
 id int unique,
 question_id int,
 user_id string,
@@ -45,12 +45,12 @@ id int unique,
 name string unique,
 avatar_url string,
 introduction string,
-is_location boolean,
-is_school boolean,
-is_major boolean,
-is_company boolean,
-is_business boolean,
-is_job boolean,
+location int,
+school int,
+major int,
+company int,
+business int,
+job int,
 ##topic_type (string array)(default topic, -> location, school, major, company),
 
 

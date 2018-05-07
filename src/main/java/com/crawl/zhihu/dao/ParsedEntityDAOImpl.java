@@ -115,9 +115,9 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             preparedStatement.setInt(11, parsedUser.getFollower_count());
             preparedStatement.setInt(12, parsedUser.getArticles_count());
             preparedStatement.setString(13, parsedUser.getIdentity());
-            preparedStatement.setString(14, parsedUser.getLocations() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getLocations())));
-            preparedStatement.setString(15, parsedUser.getEducations() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getEducations())));
-            preparedStatement.setString(16, parsedUser.getBest_answerer() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getBest_answerer())));
+            preparedStatement.setString(14, parsedUser.getLocations() == null ? null : Arrays.toString(parsedUser.getLocations()));
+            preparedStatement.setString(15, parsedUser.getEducations() == null || parsedUser.getEducations().length == 0 ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getEducations())));
+            preparedStatement.setString(16, parsedUser.getBest_answerer() == null || parsedUser.getBest_answerer().length == 0 ? null : Arrays.toString(parsedUser.getBest_answerer()));
             preparedStatement.setString(17, parsedUser.getEmployments() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getEmployments())));
             preparedStatement.setBoolean(18, parsedUser.isIs_advertiser());
             preparedStatement.setBoolean(19, parsedUser.isIs_org());
@@ -151,7 +151,7 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
         if (isParsedTopicExisted(connection, parsedTopic.getId())) {
             return false;
         }
-        String columns = "id, name, avatar_url, introduction, is_location, is_school, is_major, is_company, is_job, is_business";
+        String columns = "id, name, avatar_url, introduction, location, school, major, company, job, business";
         String values = "?, ?, ?, ?, ?, ?, ?, ?, ?, ?";
         String sql = "insert into parsed_topic (" + columns + ") values (" + values + ")";
         try {
@@ -160,12 +160,12 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             preparedStatement.setString(2, parsedTopic.getName());
             preparedStatement.setString(3, parsedTopic.getAvatar_url());
             preparedStatement.setString(4, parsedTopic.getIntroduction());
-            preparedStatement.setBoolean(5, parsedTopic.isIs_location());
-            preparedStatement.setBoolean(6, parsedTopic.isIs_school());
-            preparedStatement.setBoolean(7, parsedTopic.isIs_major());
-            preparedStatement.setBoolean(8, parsedTopic.isIs_company());
-            preparedStatement.setBoolean(9, parsedTopic.isIs_job());
-            preparedStatement.setBoolean(10, parsedTopic.isIs_business());
+            preparedStatement.setInt(5, parsedTopic.isIs_location() ? 1 : 0);
+            preparedStatement.setInt(6, parsedTopic.isIs_school() ? 1 : 0);
+            preparedStatement.setInt(7, parsedTopic.isIs_major() ? 1 : 0);
+            preparedStatement.setInt(8, parsedTopic.isIs_company() ? 1 : 0);
+            preparedStatement.setInt(9, parsedTopic.isIs_job() ? 1 : 0);
+            preparedStatement.setInt(10, parsedTopic.isIs_business() ? 1 : 0);
             preparedStatement.executeUpdate();
             preparedStatement.close();
             logger.info("parsed_topic: " + parsedTopic.toString());
@@ -181,25 +181,26 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
         if (!isParsedTopicExisted(connection, parsedTopic.getId())) {
             return insertParsedTopic(connection, parsedTopic);
         }
-        String preSql = "select is_location, is_school, is_major, is_company, is_job, is_business from parsed_topic where id=" + parsedTopic.getId();
+        String preSql = "select location, school, major, company, job, business from parsed_topic where id=" + parsedTopic.getId();
         try {
             PreparedStatement pstmt = connection.prepareStatement(preSql);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                boolean is_location = rs.getBoolean("is_location") || parsedTopic.isIs_location();
-                boolean is_school = rs.getBoolean("is_school") || parsedTopic.isIs_school();
-                boolean is_major = rs.getBoolean("is_major") || parsedTopic.isIs_major();
-                boolean is_company = rs.getBoolean("is_company") || parsedTopic.isIs_company();
-                boolean is_job = rs.getBoolean("is_job") || parsedTopic.isIs_job();
-                boolean is_business = rs.getBoolean("is_business") || parsedTopic.isIs_business();
-                String tempSql = "update parsed_topic set is_location=?, is_school=?, is_major=?, is_company=?, is_job=?, is_business=?";
+                int location = rs.getInt("location") + (parsedTopic.isIs_location() ? 1 : 0);
+                int school = rs.getInt("school") + (parsedTopic.isIs_school() ? 1 : 0);
+                int major = rs.getInt("major") + (parsedTopic.isIs_major() ? 1 : 0);
+                int company = rs.getInt("company") + (parsedTopic.isIs_company() ? 1 : 0);
+                int job = rs.getInt("job") + (parsedTopic.isIs_job() ? 1 : 0);
+                int business = rs.getInt("business") + (parsedTopic.isIs_business() ? 1 : 0);
+                String tempSql = "update parsed_topic set location=?, school=?, major=?, company=?, job=?, business=? where id=?";
                 PreparedStatement tempPstmt = connection.prepareStatement(tempSql);
-                tempPstmt.setBoolean(1, is_location);
-                tempPstmt.setBoolean(2, is_school);
-                tempPstmt.setBoolean(3, is_major);
-                tempPstmt.setBoolean(4, is_company);
-                tempPstmt.setBoolean(5, is_job);
-                tempPstmt.setBoolean(6, is_business);
+                tempPstmt.setInt(1, location);
+                tempPstmt.setInt(2, school);
+                tempPstmt.setInt(3, major);
+                tempPstmt.setInt(4, company);
+                tempPstmt.setInt(5, job);
+                tempPstmt.setInt(6, business);
+                tempPstmt.setInt(7, parsedTopic.getId());
                 tempPstmt.executeUpdate();
                 tempPstmt.close();
                 logger.info("update: " + parsedTopic.toString());
