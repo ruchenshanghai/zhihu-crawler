@@ -9,6 +9,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 登录模式 “我关注的人”列表页面解析器
@@ -34,5 +35,10 @@ public class ZhiHuUserFollowingListPageParser implements ListPageParser {
             list.add(u);
         }
         return list;
+    }
+
+    @Override
+    public List parsedPage(Page page, Map map) {
+        return null;
     }
 }

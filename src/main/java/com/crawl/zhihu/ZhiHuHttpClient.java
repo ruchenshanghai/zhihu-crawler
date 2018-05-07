@@ -76,7 +76,7 @@ public class ZhiHuHttpClient extends AbstractHttpClient implements IHttpClient{
     @Override
     public void initHttpClient() {
         if(Config.dbEnable){
-            ZhiHuDao1Imp.DBTablesInit();
+//            ZhiHuDao1Imp.DBTablesInit();
         }
     }
 

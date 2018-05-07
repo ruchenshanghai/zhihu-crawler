@@ -61,6 +61,14 @@ public class ParsedUser {
                 '}';
     }
 
+    public boolean isGender() {
+        return gender;
+    }
+
+    public void setGender(boolean gender) {
+        this.gender = gender;
+    }
+
     public int getBusiness_id() {
         return business_id;
     }
@@ -219,14 +227,6 @@ public class ParsedUser {
 
     public void setIs_org(boolean is_org) {
         this.is_org = is_org;
-    }
-
-    public boolean isGenderMale() {
-        return gender;
-    }
-
-    public void setGenderMale(boolean gender) {
-        this.gender = gender;
     }
 
     public static class Education {

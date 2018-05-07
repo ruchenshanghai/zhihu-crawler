@@ -11,6 +11,7 @@ import com.crawl.zhihu.entity.User;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import net.minidev.json.JSONArray;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.Map;
 /**
  * 用户详情列表页
  */
-public class ZhiHuUserListPageParser implements ListPageParser {
+public class ZhiHuUserListPageParser implements ListPageParser<Integer, ParsedTopic> {
     private static ZhiHuUserListPageParser instance;
 
     public static ZhiHuUserListPageParser getInstance() {
@@ -35,9 +36,10 @@ public class ZhiHuUserListPageParser implements ListPageParser {
         return instance;
     }
 
-    public List<ParsedUser> parsedPage(Page page) {
+
+    @Override
+    public List<ParsedUser> parsedPage(Page page, Map<Integer, ParsedTopic> parsedTopicMap) {
         List<ParsedUser> parsedUserList = new ArrayList<>();
-        Map<Integer, ParsedTopic> parsedTopicMap = new LinkedHashMap<>();
         String baseJsonPath = "$.data.length()";
         DocumentContext dc = JsonPath.parse(page.getHtml());
         Integer userCount = dc.read(baseJsonPath);
@@ -56,6 +58,9 @@ public class ZhiHuUserListPageParser implements ListPageParser {
             tempParsedUser.setThanked_count((Integer) dc.read(tempBaseJsonPath + ".thanked_count"));
             tempParsedUser.setFollower_count((Integer) dc.read(tempBaseJsonPath + ".follower_count"));
             tempParsedUser.setArticles_count((Integer) dc.read(tempBaseJsonPath + ".articles_count"));
+            tempParsedUser.setIs_advertiser((Boolean) dc.read(tempBaseJsonPath + ".is_advertiser"));
+            tempParsedUser.setIs_org((Boolean) dc.read(tempBaseJsonPath + ".is_org"));
+            tempParsedUser.setGender(((Integer)dc.read(tempBaseJsonPath + ".gender")) == 1);
             try {
                 ParsedTopic tempBusiness = new ParsedTopic();
                 tempBusiness.setId(Integer.parseInt((String) dc.read(tempBaseJsonPath + ".business.id")));
@@ -70,27 +75,32 @@ public class ZhiHuUserListPageParser implements ListPageParser {
                 }
                 tempParsedUser.setBusiness_id(tempBusiness.getId());
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
-            if (tempParsedUser.getFollowing_count() < Constants.MINIMUM_FOLLOWING_COUNT || tempParsedUser.getAnswer_count() < Constants.MINIMUM_ANSWER_COUNT || tempParsedUser.getQuestion_count() < Constants.MINIMUM_QUESTION_COUNT || tempParsedUser.getVoteup_count() < Constants.MINIMUM_VOTE_UP_COUNT || tempParsedUser.getThanked_count() < Constants.MINIMUM_THANKED_COUNT || tempParsedUser.getFollower_count() < Constants.MINIMUM_FOLLOWER_COUNT || tempParsedUser.getArticles_count() < Constants.MINIMUM_ARTICLE_COUNT) {
+            if (tempParsedUser.getFollowing_count() < Constants.MINIMUM_FOLLOWING_COUNT || tempParsedUser.getAnswer_count() < Constants.MINIMUM_ANSWER_COUNT || tempParsedUser.getQuestion_count() < Constants.MINIMUM_QUESTION_COUNT || tempParsedUser.getVoteup_count() < Constants.MINIMUM_VOTE_UP_COUNT || tempParsedUser.getThanked_count() < Constants.MINIMUM_THANKED_COUNT || tempParsedUser.getFollower_count() < Constants.MINIMUM_FOLLOWER_COUNT) {
+//                 || tempParsedUser.getArticles_count() < Constants.MINIMUM_ARTICLE_COUNT
                 continue;
             }
-            ArrayList<ParsedUser.Education> tempEducations = new ArrayList<>();
-            ArrayList<String> tempEmployments = new ArrayList<>();
 
             // badge -> identity, best_answerer
             int badgeLength = (Integer) dc.read(tempBaseJsonPath + ".badge.length()");
             if (badgeLength > 0) {
-                String tempIdentity = "";
                 ArrayList<Integer> tempBestAnswers = new ArrayList<>();
+                String tempIdentity = "";
                 for (int j = 0; j < badgeLength; j++) {
-                    String tempBadgeBase = tempBaseJsonPath + ".bagde[" + j + "]";
-                    if (dc.read(tempBadgeBase + ".type").equals("best_answerer")) {
+                    String tempBadgeBase = (tempBaseJsonPath + ".badge[" + j + "]");
+                    String badgeType = dc.read(tempBadgeBase + ".type");
+                    if (badgeType.equals("best_answerer")) {
                         int tempTopicCount = (Integer) dc.read(tempBadgeBase + ".topics.length()");
                         for (int topicIndex = 0; topicIndex < tempTopicCount; topicIndex++) {
                             String tempTopicBase = tempBadgeBase + ".topics[" + topicIndex + "]";
                             ParsedTopic tempTopic = new ParsedTopic();
-                            tempTopic.setId(Integer.parseInt((String) dc.read(tempTopicBase + ".id")));
+                            try {
+                                tempTopic.setId(Integer.parseInt((String) dc.read(tempTopicBase + ".id")));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                continue;
+                            }
                             tempTopic.setName((String) dc.read(tempTopicBase + ".name"));
                             tempTopic.setAvatar_url((String) dc.read(tempTopicBase + ".avatar_url"));
                             tempTopic.setIntroduction((String) dc.read(tempTopicBase + ".introduction"));
@@ -120,7 +130,11 @@ public class ZhiHuUserListPageParser implements ListPageParser {
                 for (int j = 0; j < locationLength; j++) {
                     String tempLocationBase = tempBaseJsonPath + ".locations[" + j + "]";
                     ParsedTopic tempLocation = new ParsedTopic();
-                    tempLocation.setId(Integer.parseInt((String) dc.read(tempLocationBase + ".id")));
+                    try {
+                        tempLocation.setId(Integer.parseInt((String) dc.read(tempLocationBase + ".id")));
+                    } catch (Exception e) {
+                        continue;
+                    }
                     tempLocation.setName((String) dc.read(tempLocationBase + ".name"));
                     tempLocation.setAvatar_url((String) dc.read(tempLocationBase + ".avatar_url"));
                     tempLocation.setIntroduction((String) dc.read(tempLocationBase + ".introduction"));
@@ -136,12 +150,99 @@ public class ZhiHuUserListPageParser implements ListPageParser {
             } else {
                 tempParsedUser.setLocations(null);
             }
-            // educations
+            // educations -> school, major
+            int educationLength = (Integer) dc.read(tempBaseJsonPath + ".educations.length()");
+            if (educationLength > 0) {
+                ParsedUser.Education[] tempEducations = new ParsedUser.Education[educationLength];
+                for (int j = 0; j < educationLength; j++) {
+                    String tempEducationBase = tempBaseJsonPath + ".educations[" + j + "]";
+                    tempEducations[j] = new ParsedUser.Education();
 
-            // employments
+                    try {
+                        ParsedTopic tempSchool = new ParsedTopic();
+                        tempSchool.setId(Integer.parseInt((String) dc.read(tempEducationBase + ".school.id")));
+                        tempSchool.setName((String) dc.read(tempEducationBase + ".school.name"));
+                        tempSchool.setAvatar_url((String) dc.read(tempEducationBase + ".school.avatar_url"));
+                        tempSchool.setIntroduction((String) dc.read(tempEducationBase + ".school.introduction"));
+                        tempSchool.setIs_school(true);
+                        if (!parsedTopicMap.containsKey(tempSchool.getId())) {
+                            parsedTopicMap.put(tempSchool.getId(), tempSchool);
+                        } else {
+                            parsedTopicMap.get(tempSchool.getId()).setIs_school(true);
+                        }
+                        tempEducations[j].setSchool_id(Integer.parseInt((String) dc.read(tempEducationBase + ".school.id")));
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                    }
+
+                    try {
+                        ParsedTopic tempMajor = new ParsedTopic();
+                        tempMajor.setId(Integer.parseInt((String) dc.read(tempEducationBase + ".major.id")));
+                        tempMajor.setName((String) dc.read(tempEducationBase + ".major.name"));
+                        tempMajor.setAvatar_url((String) dc.read(tempEducationBase + ".major.avatar_url"));
+                        tempMajor.setIntroduction((String) dc.read(tempEducationBase + ".major.introduction"));
+                        tempMajor.setIs_school(true);
+                        if (!parsedTopicMap.containsKey(tempMajor.getId())) {
+                            parsedTopicMap.put(tempMajor.getId(), tempMajor);
+                        } else {
+                            parsedTopicMap.get(tempMajor.getId()).setIs_major(true);
+                        }
+                        tempEducations[j].setMajor_id(Integer.parseInt((String) dc.read(tempEducationBase + ".major.id")));
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                    }
+
+                }
+                tempParsedUser.setEducations(tempEducations);
+            } else {
+                tempParsedUser.setEducations(null);
+            }
+            // employments -> job, company
+            int employmentLength = (Integer) dc.read(tempBaseJsonPath + ".employments.length()");
+            if (employmentLength > 0) {
+                ParsedUser.Employment[] tempEmployments = new ParsedUser.Employment[employmentLength];
+                for (int j = 0; j < employmentLength; j++) {
+                    String tempEmploymentBase = tempBaseJsonPath + ".employments[" + j + "]";
+                    tempEmployments[j] = new ParsedUser.Employment();
+                    try {
+                        ParsedTopic tempJob = new ParsedTopic();
+                        tempJob.setId(Integer.parseInt((String) dc.read(tempEmploymentBase + ".job.id")));
+                        tempJob.setName((String) dc.read(tempEmploymentBase + ".job.name"));
+                        tempJob.setAvatar_url((String) dc.read(tempEmploymentBase + ".job.avatar_url"));
+                        tempJob.setIntroduction((String) dc.read(tempEmploymentBase + ".job.introduction"));
+                        tempJob.setIs_job(true);
+                        if (!parsedTopicMap.containsKey(tempJob.getId())) {
+                            parsedTopicMap.put(tempJob.getId(), tempJob);
+                        } else {
+                            parsedTopicMap.get(tempJob.getId()).setIs_job(true);
+                        }
+                        tempEmployments[j].setJob_id(Integer.parseInt((String) dc.read(tempEmploymentBase + ".job.id")));
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                    }
+                    try {
+                        ParsedTopic tempCompany = new ParsedTopic();
+                        tempCompany.setId(Integer.parseInt((String) dc.read(tempEmploymentBase + ".company.id")));
+                        tempCompany.setName((String) dc.read(tempEmploymentBase + ".company.name"));
+                        tempCompany.setAvatar_url((String) dc.read(tempEmploymentBase + ".company.avatar_url"));
+                        tempCompany.setIntroduction((String) dc.read(tempEmploymentBase + ".company.introduction"));
+                        tempCompany.setIs_company(true);
+                        if (!parsedTopicMap.containsKey(tempCompany.getId())) {
+                            parsedTopicMap.put(tempCompany.getId(), tempCompany);
+                        } else {
+                            parsedTopicMap.get(tempCompany.getId()).setIs_company(true);
+                        }
+                        tempEmployments[j].setCompany_id(Integer.parseInt((String) dc.read(tempEmploymentBase + ".company.id")));
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                    }
+                }
+                tempParsedUser.setEmployments(tempEmployments);
+            } else {
+                tempParsedUser.setEmployments(null);
+            }
+            parsedUserList.add(tempParsedUser);
         }
-
-
         return parsedUserList;
     }
 

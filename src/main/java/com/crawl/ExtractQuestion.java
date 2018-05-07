@@ -25,15 +25,21 @@ public class ExtractQuestion {
 //        String jsonArray = JSONArray.toJSONString(Arrays.asList(test3));
 //        System.out.println(jsonArray);
 
-        String testCode = unicode2String("\\u7f8e\\u98df");
-        System.out.println(testCode);
-        try {
-            String code1 = new String(testCode.getBytes(), "utf-8");
-            System.out.println(code1);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        System.out.println(JSONArray.toJSONString(Arrays.asList(null)));
+
+//        ParsedUser.Education test = new ParsedUser.Education();
+//        System.out.println(test.getMajor_id());
+//        System.out.println(test.getSchool_id());
+//        String testCode = unicode2String("\\u7f8e\\u98df");
+//        System.out.println(testCode);
+//        try {
+//            String code1 = new String(testCode.getBytes(), "utf-8");
+//            System.out.println(code1);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
     }
+
     public static String unicode2String(String unicode) {
         StringBuilder string = new StringBuilder();
         String[] hex = unicode.split("\\\\u");

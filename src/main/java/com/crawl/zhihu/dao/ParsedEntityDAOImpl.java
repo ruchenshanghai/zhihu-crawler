@@ -8,19 +8,63 @@ import com.crawl.zhihu.entity.ParsedUser;
 import net.minidev.json.JSONArray;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.sql.*;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(ParsedEntityDAOInterface.class);
+
+
+//    public static void DBTablesInit() {
+//        ResultSet rs = null;
+//        Properties p = new Properties();
+//        Connection cn = ConnectionManager.getConnection();
+//        try {
+//            //加载properties文件
+//            p.load(ZhiHuDao1Imp.class.getResourceAsStream("/config.properties"));
+//            rs = cn.getMetaData().getTables(null, null, "url", null);
+//            Statement st = cn.createStatement();
+//            //不存在url表
+//            if(!rs.next()){
+//                //创建url表
+//                st.execute(p.getProperty("createUrlTable"));
+//                logger.info("url表创建成功");
+////                st.execute(p.getProperty("createUrlIndex"));
+////                logger.info("url表索引创建成功");
+//            }
+//            else{
+//                logger.info("url表已存在");
+//            }
+//            rs = cn.getMetaData().getTables(null, null, "user", null);
+//            //不存在user表
+//            if(!rs.next()){
+//                //创建user表
+//                st.execute(p.getProperty("createUserTable"));
+//                logger.info("user表创建成功");
+////                st.execute(p.getProperty("createUserIndex"));
+////                logger.info("user表索引创建成功");
+//            }
+//            else{
+//                logger.info("user表已存在");
+//            }
+//            rs.close();
+//            st.close();
+//            cn.close();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     @Override
-    public boolean isExistEntity(String sql) throws SQLException {
+    public boolean isExistEntity(Connection connection, String sql) throws SQLException {
         int count = 0;
         PreparedStatement pstmt;
-        pstmt = ConnectionManager.getConnection().prepareStatement(sql);
+        pstmt = connection.prepareStatement(sql);
         ResultSet rs = pstmt.executeQuery();
         while (rs.next()) {
             count = rs.getInt("count(*)");
@@ -35,10 +79,10 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean isParsedUserExisted(String user_token) {
+    public boolean isParsedUserExisted(Connection connection, String user_token) {
         String containsParsedUserSql = "select count(*) from parsed_user where user_token='" + user_token + "'";
         try {
-            if (isExistEntity(containsParsedUserSql)) {
+            if (isExistEntity(connection, containsParsedUserSql)) {
                 return true;
             }
         } catch (SQLException e) {
@@ -48,8 +92,8 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean insertParsedUser(ParsedUser parsedUser) {
-        if (isParsedUserExisted(parsedUser.getUser_token())) {
+    public boolean insertParsedUser(Connection connection, ParsedUser parsedUser) {
+        if (isParsedUserExisted(connection, parsedUser.getUser_token())) {
             return false;
         }
         String columns = "id, avatar_url, user_token, name, headline, following_count, answer_count, question_count, voteup_count, thanked_count, " +
@@ -71,13 +115,13 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             preparedStatement.setInt(11, parsedUser.getFollower_count());
             preparedStatement.setInt(12, parsedUser.getArticles_count());
             preparedStatement.setString(13, parsedUser.getIdentity());
-            preparedStatement.setString(14, JSONArray.toJSONString(Arrays.asList(parsedUser.getLocations())));
-            preparedStatement.setString(15, JSONArray.toJSONString(Arrays.asList(parsedUser.getEducations())));
-            preparedStatement.setString(16, JSONArray.toJSONString(Arrays.asList(parsedUser.getBest_answerer())));
-            preparedStatement.setString(17, JSONArray.toJSONString(Arrays.asList(parsedUser.getEmployments())));
+            preparedStatement.setString(14, parsedUser.getLocations() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getLocations())));
+            preparedStatement.setString(15, parsedUser.getEducations() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getEducations())));
+            preparedStatement.setString(16, parsedUser.getBest_answerer() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getBest_answerer())));
+            preparedStatement.setString(17, parsedUser.getEmployments() == null ? null : JSONArray.toJSONString(Arrays.asList(parsedUser.getEmployments())));
             preparedStatement.setBoolean(18, parsedUser.isIs_advertiser());
             preparedStatement.setBoolean(19, parsedUser.isIs_org());
-            preparedStatement.setBoolean(20, parsedUser.isGenderMale());
+            preparedStatement.setBoolean(20, parsedUser.isGender());
             preparedStatement.setInt(21, parsedUser.getBusiness_id());
             preparedStatement.executeUpdate();
             preparedStatement.close();
@@ -90,10 +134,10 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean isParsedTopicExisted(int id) {
+    public boolean isParsedTopicExisted(Connection connection, int id) {
         String containsParsedTopicSql = "select count(*) from parsed_topic where id='" + id + "'";
         try {
-            if (isExistEntity(containsParsedTopicSql)) {
+            if (isExistEntity(connection, containsParsedTopicSql)) {
                 return true;
             }
         } catch (SQLException e) {
@@ -103,8 +147,8 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean insertParsedTopic(ParsedTopic parsedTopic) {
-        if (isParsedTopicExisted(parsedTopic.getId())) {
+    public boolean insertParsedTopic(Connection connection, ParsedTopic parsedTopic) {
+        if (isParsedTopicExisted(connection, parsedTopic.getId())) {
             return false;
         }
         String columns = "id, name, avatar_url, introduction, is_location, is_school, is_major, is_company, is_job, is_business";
@@ -133,10 +177,47 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean isParsedQuestionExisted(int id) {
+    public boolean insertOrUpdateParsedTopic(Connection connection, ParsedTopic parsedTopic) {
+        if (!isParsedTopicExisted(connection, parsedTopic.getId())) {
+            return insertParsedTopic(connection, parsedTopic);
+        }
+        String preSql = "select is_location, is_school, is_major, is_company, is_job, is_business from parsed_topic where id=" + parsedTopic.getId();
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(preSql);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                boolean is_location = rs.getBoolean("is_location") || parsedTopic.isIs_location();
+                boolean is_school = rs.getBoolean("is_school") || parsedTopic.isIs_school();
+                boolean is_major = rs.getBoolean("is_major") || parsedTopic.isIs_major();
+                boolean is_company = rs.getBoolean("is_company") || parsedTopic.isIs_company();
+                boolean is_job = rs.getBoolean("is_job") || parsedTopic.isIs_job();
+                boolean is_business = rs.getBoolean("is_business") || parsedTopic.isIs_business();
+                String tempSql = "update parsed_topic set is_location=?, is_school=?, is_major=?, is_company=?, is_job=?, is_business=?";
+                PreparedStatement tempPstmt = connection.prepareStatement(tempSql);
+                tempPstmt.setBoolean(1, is_location);
+                tempPstmt.setBoolean(2, is_school);
+                tempPstmt.setBoolean(3, is_major);
+                tempPstmt.setBoolean(4, is_company);
+                tempPstmt.setBoolean(5, is_job);
+                tempPstmt.setBoolean(6, is_business);
+                tempPstmt.executeUpdate();
+                tempPstmt.close();
+                logger.info("update: " + parsedTopic.toString());
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    @Override
+    public boolean isParsedQuestionExisted(Connection connection, int id) {
         String containsParsedQuestionSql = "select count(*) from parsed_question where id=" + id;
         try {
-            if (isExistEntity(containsParsedQuestionSql)) {
+            if (isExistEntity(connection, containsParsedQuestionSql)) {
                 return true;
             }
         } catch (SQLException e) {
@@ -146,8 +227,8 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean insertParsedQuestion(ParsedQuestion parsedQuestion) {
-        if (isParsedQuestionExisted(parsedQuestion.getId())) {
+    public boolean insertParsedQuestion(Connection connection, ParsedQuestion parsedQuestion) {
+        if (isParsedQuestionExisted(connection, parsedQuestion.getId())) {
             return false;
         }
         String columns = "id, content, followers, viewers, comments, answers, keywords";
@@ -173,10 +254,10 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean isParsedAnswerExisted(int id) {
+    public boolean isParsedAnswerExisted(Connection connection, int id) {
         String containsParsedAnswerSql = "select count(*) from parsed_answer where id=" + id;
         try {
-            if (isExistEntity(containsParsedAnswerSql)) {
+            if (isExistEntity(connection, containsParsedAnswerSql)) {
                 return true;
             }
         } catch (SQLException e) {
@@ -186,8 +267,8 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     }
 
     @Override
-    public boolean insertParsedAnswer(ParsedAnswer parsedAnswer) {
-        if (isParsedAnswerExisted(parsedAnswer.getId())) {
+    public boolean insertParsedAnswer(Connection connection, ParsedAnswer parsedAnswer) {
+        if (isParsedAnswerExisted(connection, parsedAnswer.getId())) {
             return false;
         }
         String columns = "id, question_id, user_id, voteup_count, comment_count, content";

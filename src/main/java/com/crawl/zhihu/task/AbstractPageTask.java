@@ -7,6 +7,8 @@ import com.crawl.proxy.ProxyPool;
 import com.crawl.proxy.entity.Direct;
 import com.crawl.proxy.entity.Proxy;
 import com.crawl.proxy.util.ProxyUtil;
+import com.crawl.zhihu.dao.ParsedEntityDAOImpl;
+import com.crawl.zhihu.dao.ParsedEntityDAOInterface;
 import com.crawl.zhihu.dao.ZhiHuDao1;
 import com.crawl.zhihu.dao.ZhiHuDao1Imp;
 import com.crawl.zhihu.entity.Page;
@@ -35,9 +37,11 @@ public abstract class AbstractPageTask implements Runnable{
 	protected boolean proxyFlag;//是否通过代理下载
 	protected Proxy currentProxy;//当前线程使用的代理
 	protected static ZhiHuDao1 zhiHuDao1;
+	protected static ParsedEntityDAOInterface parsedEntityDAOInterface;
 	protected static ZhiHuHttpClient zhiHuHttpClient = ZhiHuHttpClient.getInstance();
 	static {
 		zhiHuDao1 = getZhiHuDao1();
+		parsedEntityDAOInterface = getParsedEntityDAO();
 	}
 	public AbstractPageTask(){
 
@@ -173,5 +177,13 @@ public abstract class AbstractPageTask implements Runnable{
 		ZhiHuDao1 proxyZhiHuDao1 = (ZhiHuDao1) java.lang.reflect.Proxy.newProxyInstance(zhiHuDao1.getClass().getClassLoader(),
 				zhiHuDao1.getClass().getInterfaces(), invocationHandler);
 		return proxyZhiHuDao1;
+	}
+
+	private static ParsedEntityDAOInterface getParsedEntityDAO(){
+		ParsedEntityDAOInterface parsedEntityDAOInterface = new ParsedEntityDAOImpl();
+		InvocationHandler invocationHandler = new SimpleInvocationHandler(parsedEntityDAOInterface);
+		ParsedEntityDAOInterface parsedEntityDAOInterfaceProxy = (ParsedEntityDAOInterface) java.lang.reflect.Proxy.newProxyInstance(parsedEntityDAOInterface.getClass().getClassLoader(),
+				parsedEntityDAOInterface.getClass().getInterfaces(), invocationHandler);
+		return parsedEntityDAOInterfaceProxy;
 	}
 }

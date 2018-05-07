@@ -1,5 +1,6 @@
 package com.crawl.zhihu.dao;
 
+import com.crawl.core.dao.ConnectionManager;
 import com.crawl.zhihu.entity.ParsedAnswer;
 import com.crawl.zhihu.entity.ParsedQuestion;
 import com.crawl.zhihu.entity.ParsedTopic;
@@ -9,25 +10,25 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public interface ParsedEntityDAOInterface {
-    boolean isExistEntity(String sql) throws SQLException;
+    boolean isExistEntity(Connection connection, String sql) throws SQLException;
 
-    boolean isParsedUserExisted(String user_token);
+    boolean isParsedUserExisted(Connection connection, String user_token);
 
-    boolean insertParsedUser(ParsedUser parsedUser);
+    boolean insertParsedUser(Connection connection, ParsedUser parsedUser);
+
+    boolean isParsedTopicExisted(Connection connection, int id);
+
+    boolean insertParsedTopic(Connection connection, ParsedTopic parsedTopic);
+
+    boolean insertOrUpdateParsedTopic(Connection connection, ParsedTopic parsedTopic);
+
+    boolean isParsedQuestionExisted(Connection connection, int id);
+
+    boolean insertParsedQuestion(Connection connection, ParsedQuestion parsedQuestion);
 
 
-    boolean isParsedTopicExisted(int id);
+    boolean isParsedAnswerExisted(Connection connection, int id);
 
-    boolean insertParsedTopic(ParsedTopic parsedTopic);
-
-
-    boolean isParsedQuestionExisted(int id);
-
-    boolean insertParsedQuestion(ParsedQuestion parsedQuestion);
-
-
-    boolean isParsedAnswerExisted(int id);
-
-    boolean insertParsedAnswer(ParsedAnswer parsedAnswer);
+    boolean insertParsedAnswer(Connection connection, ParsedAnswer parsedAnswer);
 
 }
