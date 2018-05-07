@@ -7,6 +7,7 @@ import com.crawl.zhihu.entity.ParsedTopic;
 import com.crawl.zhihu.entity.ParsedUser;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public interface ParsedEntityDAOInterface {
@@ -15,6 +16,8 @@ public interface ParsedEntityDAOInterface {
     boolean isParsedUserExisted(Connection connection, String user_token);
 
     boolean insertParsedUser(Connection connection, ParsedUser parsedUser);
+
+    String[] selectAllUserTokenOrderByWeight(Connection connection);
 
     boolean isParsedTopicExisted(Connection connection, int id);
 
@@ -30,5 +33,6 @@ public interface ParsedEntityDAOInterface {
     boolean isParsedAnswerExisted(Connection connection, int id);
 
     boolean insertParsedAnswer(Connection connection, ParsedAnswer parsedAnswer);
+
 
 }

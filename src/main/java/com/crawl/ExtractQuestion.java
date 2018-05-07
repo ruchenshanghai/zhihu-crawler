@@ -25,7 +25,7 @@ public class ExtractQuestion {
 //        String jsonArray = JSONArray.toJSONString(Arrays.asList(test3));
 //        System.out.println(jsonArray);
 
-        int[] test = new int[] {123, 321, 456};
+        String[] test = new String[] {"123", "321", "456"};
         System.out.println(Arrays.toString(test));
 
 //        System.out.println(JSONArray.toJSONString(Arrays.asList(null)));

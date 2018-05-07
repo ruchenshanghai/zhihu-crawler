@@ -6,6 +6,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface ListPageParser<K, V> extends Parser {
-    List parseListPage(Page page);
     List parsedPage(Page page, Map<K, V> map);
 }

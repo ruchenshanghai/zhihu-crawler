@@ -79,3 +79,89 @@ type string,
 
 
 
+# create table graduation.parsed_question
+# (
+#   id int not null
+#     primary key,
+#   content mediumtext null,
+#   followers int null,
+#   viewers int null,
+#   comments int null,
+#   answers int null,
+#   keywords varchar(1024) null,
+#   constraint parsed_question_id_uindex
+#   unique (id)
+# )
+#   engine=InnoDB charset=utf8
+# ;
+
+# create table graduation.parsed_answer
+# (
+#   id int not null
+#     primary key,
+#   question_id int null,
+#   user_id varchar(255) null,
+#   voteup_count int null,
+#   comment_count int null,
+#   content mediumtext null,
+#   constraint parsed_answer_id_uindex
+#   unique (id)
+# )
+#   engine=InnoDB charset=utf8
+# ;
+
+# create table graduation.parsed_user
+# (
+#   id varchar(255) not null
+#     primary key,
+#   avatar_url varchar(255) null,
+#   user_token varchar(255) null,
+#   name varchar(255) null,
+#   headline varchar(1024) null,
+#   following_count int null,
+#   answer_count int null,
+#   question_count int null,
+#   voteup_count int null,
+#   thanked_count int null,
+#   follower_count int null,
+#   articles_count int null,
+#   identity varchar(255) null,
+#   business_id int null,
+#   locations mediumtext null,
+#   educations mediumtext null,
+#   best_answerer mediumtext null,
+#   employments mediumtext null,
+#   is_advertiser tinyint(1) null,
+#   is_org tinyint(1) null,
+#   gender tinyint(1) null,
+#   constraint parsed_user_id_uindex
+#   unique (id),
+#   constraint parsed_user_user_token_uindex
+#   unique (user_token)
+# )
+#   engine=InnoDB charset=utf8
+# ;
+
+
+# create table graduation.parsed_topic
+# (
+#   id int not null
+#     primary key,
+#   name varchar(255) null,
+#   avatar_url varchar(255) null,
+#   introduction mediumtext null,
+#   location int null,
+#   school int null,
+#   major int null,
+#   company int null,
+#   business int null,
+#   job int null,
+#   constraint parsed_topic_id_uindex
+#   unique (id),
+#   constraint parsed_topic_name_uindex
+#   unique (name)
+# )
+#   engine=InnoDB charset=utf8
+# ;
+# alter table graduation.parsed_answer convert to character set utf8;
+

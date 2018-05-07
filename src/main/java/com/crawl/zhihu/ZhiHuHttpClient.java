@@ -1,14 +1,14 @@
 package com.crawl.zhihu;
 
-import com.crawl.Main;
+import com.crawl.core.dao.ConnectionManager;
 import com.crawl.core.httpclient.AbstractHttpClient;
 import com.crawl.core.httpclient.IHttpClient;
 import com.crawl.core.util.*;
 import com.crawl.proxy.ProxyHttpClient;
-import com.crawl.zhihu.dao.ZhiHuDao1Imp;
-import com.crawl.zhihu.support.PicAnswerTask;
-import com.crawl.zhihu.support.QuestionTask;
-import com.crawl.zhihu.task.DetailListPageTask;
+import com.crawl.zhihu.task.ParsedAnswerTask;
+import com.crawl.zhihu.task.AbstractPageTask;
+import com.crawl.zhihu.task.ParsedQuestionTask;
+import com.crawl.zhihu.task.ParsedUserListPageTask;
 import com.crawl.zhihu.task.GeneralPageTask;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -47,6 +47,9 @@ public class ZhiHuHttpClient extends AbstractHttpClient implements IHttpClient{
         }
         return instance;
     }
+
+    private static String[] userTokenArray;
+    private static int userTokenIndex = 0;
     /**
      * 详情页下载线程池
      */
@@ -113,14 +116,14 @@ public class ZhiHuHttpClient extends AbstractHttpClient implements IHttpClient{
         String startUrl = String.format(Constants.USER_FOLLOWEES_URL, startToken, 0);
         HttpGet request = new HttpGet(startUrl);
         request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
-        detailListPageThreadPool.execute(new DetailListPageTask(request, Config.isProxy));
+        detailListPageThreadPool.execute(new ParsedUserListPageTask(request, Config.isProxy));
         manageHttpClient();
     }
 
     /**
      * 爬取用户回答中图片
      */
-    public void startCrawlAnswerPic(String userToken){
+    public void startCrawlAnswerByUserToken(){
         answerPageThreadPool = new SimpleThreadPoolExecutor(Config.downloadThreadSize,
                 Config.downloadThreadSize,
                 0L, TimeUnit.MILLISECONDS,
@@ -128,10 +131,26 @@ public class ZhiHuHttpClient extends AbstractHttpClient implements IHttpClient{
                 new ThreadPoolExecutor.DiscardPolicy(),
                 "answerPageThreadPool");
         new Thread(new ThreadPoolMonitor(answerPageThreadPool, "AnswerPageThreadPool")).start();
-        String startUrl = String.format(Constants.USER_ANSWER_URL, userToken, 0);
+        String currentUserToken = getNextUserToken();
+        String startUrl = String.format(Constants.USER_ANSWER_URL, currentUserToken, 0);
         HttpRequestBase request = new HttpGet(startUrl);
         request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
-        answerPageThreadPool.execute(new PicAnswerTask(request, true, userToken));
+        answerPageThreadPool.execute(new ParsedAnswerTask(request, true, currentUserToken));
+        userTokenIndex++;
+    }
+
+    public static String getNextUserToken() {
+        if (userTokenIndex < userTokenArray.length) {
+            userTokenIndex++;
+            return userTokenArray[userTokenIndex - 1];
+        } else {
+            return null;
+        }
+    }
+
+    public void startCrawlAllAnswer() {
+        userTokenArray = AbstractPageTask.parsedEntityDAOInterface.selectAllUserTokenOrderByWeight(ConnectionManager.getConnection());
+        startCrawlAnswerByUserToken();
     }
 
     public void startCrawlQuestion(int questionID) {
@@ -139,7 +158,7 @@ public class ZhiHuHttpClient extends AbstractHttpClient implements IHttpClient{
         new Thread(new ThreadPoolMonitor(answerPool, "answerPoolMonitor")).start();
         String startUrl = String.format(Constants.QUESTION_URL, questionID);
         HttpRequestBase request = new HttpGet(startUrl);
-        answerPool.execute(new QuestionTask(request, true, questionID));
+        answerPool.execute(new ParsedQuestionTask(request, true, questionID));
 
     }
 
@@ -203,7 +222,7 @@ public class ZhiHuHttpClient extends AbstractHttpClient implements IHttpClient{
             }
             if(detailListPageThreadPool.isTerminated()){
                 //关闭数据库连接
-                Map<Thread, Connection> map = DetailListPageTask.getConnectionMap();
+                Map<Thread, Connection> map = ParsedUserListPageTask.getConnectionMap();
                 for(Connection cn : map.values()){
                     try {
                         if (cn != null && !cn.isClosed()){

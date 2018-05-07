@@ -63,14 +63,14 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     @Override
     public boolean isExistEntity(Connection connection, String sql) throws SQLException {
         int count = 0;
-        PreparedStatement pstmt;
-        pstmt = connection.prepareStatement(sql);
-        ResultSet rs = pstmt.executeQuery();
+        PreparedStatement preparedStatement;
+        preparedStatement = connection.prepareStatement(sql);
+        ResultSet rs = preparedStatement.executeQuery();
         while (rs.next()) {
             count = rs.getInt("count(*)");
         }
         rs.close();
-        pstmt.close();
+        preparedStatement.close();
         if (count == 0) {
             return false;
         } else {
@@ -131,6 +131,36 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public String[] selectAllUserTokenOrderByWeight(Connection connection) {
+        String countSql = "select count(*) from graduation.parsed_user";
+        String selectSql = "select user_token from graduation.parsed_user order by follower_count";
+        int count = 0;
+        String[] tokenArray = null;
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(countSql);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                count = rs.getInt("count(*)");
+            }
+            rs.close();
+            preparedStatement.close();
+            preparedStatement = connection.prepareStatement(selectSql);
+            rs = preparedStatement.executeQuery();
+            tokenArray = new String[count];
+            int index = 0;
+            while (rs.next()) {
+                tokenArray[index] = rs.getString("user_token");
+                index++;
+            }
+            rs.close();
+            preparedStatement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tokenArray;
     }
 
     @Override
@@ -243,7 +273,7 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
             preparedStatement.setInt(4, parsedQuestion.getViewers());
             preparedStatement.setInt(5, parsedQuestion.getComments());
             preparedStatement.setInt(6, parsedQuestion.getAnswers());
-            preparedStatement.setString(7, JSONArray.toJSONString(Arrays.asList(parsedQuestion.getKeywords())));
+            preparedStatement.setString(7, Arrays.toString(parsedQuestion.getKeywords()));
             preparedStatement.executeUpdate();
             preparedStatement.close();
             logger.info("parsed_question: " + parsedQuestion.toString());

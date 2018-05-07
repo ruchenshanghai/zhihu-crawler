@@ -1,11 +1,6 @@
 package com.crawl.core.util;
 
 
-import com.crawl.core.dao.ConnectionManager;
-import com.crawl.zhihu.task.DetailListPageTask;
-
-import java.sql.Connection;
-import java.util.Map;
 import java.util.concurrent.*;
 
 public class SimpleThreadPoolExecutor extends ThreadPoolExecutor{

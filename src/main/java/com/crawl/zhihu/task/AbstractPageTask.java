@@ -36,8 +36,7 @@ public abstract class AbstractPageTask implements Runnable{
 	protected HttpRequestBase request;
 	protected boolean proxyFlag;//是否通过代理下载
 	protected Proxy currentProxy;//当前线程使用的代理
-//	protected static ZhiHuDao1 zhiHuDao1;
-	protected static ParsedEntityDAOInterface parsedEntityDAOInterface;
+	public static ParsedEntityDAOInterface parsedEntityDAOInterface;
 	protected static ZhiHuHttpClient zhiHuHttpClient = ZhiHuHttpClient.getInstance();
 	static {
 //		zhiHuDao1 = getZhiHuDao1();
@@ -160,24 +159,6 @@ public abstract class AbstractPageTask implements Runnable{
 	 * @param page
 	 */
 	protected abstract void handle(Page page);
-
-	private String getProxyStr(Proxy proxy){
-		if (proxy == null){
-			return "";
-		}
-		return proxy.getIp() + ":" + proxy.getPort();
-	}
-	/**
-	 * 代理类，统计方法执行时间
-	 * @return
-	 */
-//	private static ZhiHuDao1 getZhiHuDao1(){
-//		ZhiHuDao1 zhiHuDao1 = new ZhiHuDao1Imp();
-//		InvocationHandler invocationHandler = new SimpleInvocationHandler(zhiHuDao1);
-//		ZhiHuDao1 proxyZhiHuDao1 = (ZhiHuDao1) java.lang.reflect.Proxy.newProxyInstance(zhiHuDao1.getClass().getClassLoader(),
-//				zhiHuDao1.getClass().getInterfaces(), invocationHandler);
-//		return proxyZhiHuDao1;
-//	}
 
 	private static ParsedEntityDAOInterface getParsedEntityDAO(){
 		ParsedEntityDAOInterface parsedEntityDAOInterface = new ParsedEntityDAOImpl();

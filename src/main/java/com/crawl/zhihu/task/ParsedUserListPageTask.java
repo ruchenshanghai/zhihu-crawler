@@ -4,16 +4,12 @@ package com.crawl.zhihu.task;
 import com.crawl.core.dao.ConnectionManager;
 import com.crawl.core.parser.ListPageParser;
 import com.crawl.core.util.Config;
-import com.crawl.core.util.Md5Util;
 import com.crawl.core.util.SimpleInvocationHandler;
 import com.crawl.zhihu.ZhiHuHttpClient;
-import com.crawl.zhihu.dao.ParsedEntityDAOImpl;
-import com.crawl.zhihu.dao.ParsedEntityDAOInterface;
 import com.crawl.zhihu.entity.Page;
 import com.crawl.zhihu.entity.ParsedTopic;
 import com.crawl.zhihu.entity.ParsedUser;
-import com.crawl.zhihu.entity.User;
-import com.crawl.zhihu.parser.ZhiHuUserListPageParser;
+import com.crawl.zhihu.parser.ParsedUserPageParser;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
@@ -33,8 +29,8 @@ import static com.crawl.zhihu.ZhiHuHttpClient.parseUserCount;
 /**
  * 知乎用户列表详情页task
  */
-public class DetailListPageTask extends AbstractPageTask{
-    private static Logger logger = LoggerFactory.getLogger(DetailListPageTask.class);
+public class ParsedUserListPageTask extends AbstractPageTask{
+    private static Logger logger = LoggerFactory.getLogger(ParsedUserListPageTask.class);
     private static ListPageParser proxyUserListPageParser;
     /**
      * Thread-数据库连接
@@ -45,7 +41,7 @@ public class DetailListPageTask extends AbstractPageTask{
     }
 
 
-    public DetailListPageTask(HttpRequestBase request, boolean proxyFlag) {
+    public ParsedUserListPageTask(HttpRequestBase request, boolean proxyFlag) {
         super(request, proxyFlag);
     }
 
@@ -54,7 +50,7 @@ public class DetailListPageTask extends AbstractPageTask{
      * @return
      */
     private static ListPageParser getProxyUserListPageParser(){
-        ListPageParser userListPageParser = ZhiHuUserListPageParser.getInstance();
+        ListPageParser userListPageParser = ParsedUserPageParser.getInstance();
         InvocationHandler invocationHandler = new SimpleInvocationHandler(userListPageParser);
         ListPageParser proxyUserListPageParser = (ListPageParser) Proxy.newProxyInstance(userListPageParser.getClass().getClassLoader(),
                 userListPageParser.getClass().getInterfaces(), invocationHandler);
@@ -63,7 +59,7 @@ public class DetailListPageTask extends AbstractPageTask{
 
     @Override
     protected void retry() {
-        zhiHuHttpClient.getDetailListPageThreadPool().execute(new DetailListPageTask(request, Config.isProxy));
+        zhiHuHttpClient.getDetailListPageThreadPool().execute(new ParsedUserListPageTask(request, Config.isProxy));
     }
 
     @Override
@@ -89,13 +85,10 @@ public class DetailListPageTask extends AbstractPageTask{
                     parseUserCount.incrementAndGet();
                 }
                 for (int j = 0; j < pu.getFollowing_count() / 20; j++) {
-//                    if (zhiHuHttpClient.getDetailListPageThreadPool().getQueue().size() > 1000) {
-//                        continue;
-//                    }
                     String nextUrl = String.format(USER_FOLLOWEES_URL, pu.getUser_token(), j * 20);
                     HttpGet request = new HttpGet(nextUrl);
                     request.setHeader("authorization", "oauth " + ZhiHuHttpClient.getAuthorization());
-                    zhiHuHttpClient.getDetailListPageThreadPool().execute(new DetailListPageTask(request, true));
+                    zhiHuHttpClient.getDetailListPageThreadPool().execute(new ParsedUserListPageTask(request, true));
                 }
             }
         }
