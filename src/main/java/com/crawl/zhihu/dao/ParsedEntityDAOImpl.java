@@ -18,48 +18,6 @@ public class ParsedEntityDAOImpl implements ParsedEntityDAOInterface {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(ParsedEntityDAOInterface.class);
 
 
-//    public static void DBTablesInit() {
-//        ResultSet rs = null;
-//        Properties p = new Properties();
-//        Connection cn = ConnectionManager.getConnection();
-//        try {
-//            //加载properties文件
-//            p.load(ZhiHuDao1Imp.class.getResourceAsStream("/config.properties"));
-//            rs = cn.getMetaData().getTables(null, null, "url", null);
-//            Statement st = cn.createStatement();
-//            //不存在url表
-//            if(!rs.next()){
-//                //创建url表
-//                st.execute(p.getProperty("createUrlTable"));
-//                logger.info("url表创建成功");
-////                st.execute(p.getProperty("createUrlIndex"));
-////                logger.info("url表索引创建成功");
-//            }
-//            else{
-//                logger.info("url表已存在");
-//            }
-//            rs = cn.getMetaData().getTables(null, null, "user", null);
-//            //不存在user表
-//            if(!rs.next()){
-//                //创建user表
-//                st.execute(p.getProperty("createUserTable"));
-//                logger.info("user表创建成功");
-////                st.execute(p.getProperty("createUserIndex"));
-////                logger.info("user表索引创建成功");
-//            }
-//            else{
-//                logger.info("user表已存在");
-//            }
-//            rs.close();
-//            st.close();
-//            cn.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     @Override
     public boolean isExistEntity(Connection connection, String sql) throws SQLException {
         int count = 0;

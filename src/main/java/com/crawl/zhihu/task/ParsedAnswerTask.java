@@ -3,9 +3,7 @@ package com.crawl.zhihu.task;
 import com.crawl.core.dao.ConnectionManager;
 import com.crawl.core.util.Config;
 import com.crawl.core.util.Constants;
-import com.crawl.core.util.HttpClientUtil;
 import com.crawl.zhihu.ZhiHuHttpClient;
-import com.crawl.zhihu.entity.Answer;
 import com.crawl.zhihu.entity.Page;
 import com.crawl.zhihu.entity.ParsedAnswer;
 import com.jayway.jsonpath.DocumentContext;
@@ -18,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**

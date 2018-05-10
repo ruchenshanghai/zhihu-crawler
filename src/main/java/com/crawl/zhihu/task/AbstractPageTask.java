@@ -9,8 +9,6 @@ import com.crawl.proxy.entity.Proxy;
 import com.crawl.proxy.util.ProxyUtil;
 import com.crawl.zhihu.dao.ParsedEntityDAOImpl;
 import com.crawl.zhihu.dao.ParsedEntityDAOInterface;
-import com.crawl.zhihu.dao.ZhiHuDao1;
-import com.crawl.zhihu.dao.ZhiHuDao1Imp;
 import com.crawl.zhihu.entity.Page;
 import com.crawl.zhihu.ZhiHuHttpClient;
 import org.apache.http.HttpHost;
